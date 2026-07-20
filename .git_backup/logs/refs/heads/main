@@ -1,0 +1,10 @@
+0000000000000000000000000000000000000000 34e0f51ea2eb07be5fb6f3a5adff481ccbcd18fb Jitendrasingh19 <singhjitendra1999g@gmail.com> 1781802568 +0530	commit (initial): Initial commit from Create Next App
+34e0f51ea2eb07be5fb6f3a5adff481ccbcd18fb 2f6f78812bc587cc9733038847da7897d13d9321 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1781841258 +0530	commit: Initial commit
+2f6f78812bc587cc9733038847da7897d13d9321 2f6f78812bc587cc9733038847da7897d13d9321 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1781841664 +0530	Branch: renamed refs/heads/master to refs/heads/main
+2f6f78812bc587cc9733038847da7897d13d9321 1223b430b88cdca367f07a030156e125dbb699f8 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1782486453 +0530	pull origin main: Fast-forward
+1223b430b88cdca367f07a030156e125dbb699f8 590c928d3728cedea1bb600757984bf90ceef554 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1782578842 +0530	pull: Fast-forward
+590c928d3728cedea1bb600757984bf90ceef554 08fb8898730ab8d10628940f2f81a07304155e55 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1783098432 +0530	commit: Add .env.example and allow tracking
+08fb8898730ab8d10628940f2f81a07304155e55 61a3374a317d6e7f954398d416fb81a6beb152a3 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1783099009 +0530	commit: Add Docker configuration and database integration
+61a3374a317d6e7f954398d416fb81a6beb152a3 b02de3c93cc81e7ee16cc4cf5e3646feff4e8766 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1783099055 +0530	pull --rebase origin main (finish): refs/heads/main onto 6e42e33c7ea7496804327b72d92a00b91eb8875a
+b02de3c93cc81e7ee16cc4cf5e3646feff4e8766 0f2a1de8bd0563413cefdc65a6f1964caee0f304 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1783191049 +0530	commit: Handle n8n webhook failures gracefully
+0f2a1de8bd0563413cefdc65a6f1964caee0f304 16d2e5d215f86cb7a3abab4c567524453c6da1f0 Jitendrasingh19 <singhjitendra1999g@gmail.com> 1784518429 +0530	commit: Add dashboard API and improve lead management
