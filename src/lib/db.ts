@@ -16,3 +16,4 @@ pool
   });
 
 export default pool;
+console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);

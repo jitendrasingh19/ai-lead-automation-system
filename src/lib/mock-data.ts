@@ -56,7 +56,7 @@ export const funnelStages = [
 
 export const recentLeads = [
   {
-    name: "John Smith",
+    name: "JohnSON Smith",
     company: "Acme Inc",
     score: 92,
     temperature: "Hot",
