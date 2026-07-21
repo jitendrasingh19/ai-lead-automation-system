@@ -77,7 +77,7 @@ export default function Home() {
               <Link href="/dashboard" className="hover:text-indigo-600">Dashboard</Link>
             </nav>
             <div className="flex items-center gap-2">
-              <Link href="/dashboard" className="hidden rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900 sm:inline-flex">View Dashboard</Link>
+              <Link href="/admin/login" className="hidden rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-900 sm:inline-flex">Admin Login</Link>
               <a href="#quote" className="inline-flex rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20">Get a Quote</a>
             </div>
           </div>
@@ -90,7 +90,7 @@ export default function Home() {
             <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">Enrich leads, route them intelligently, and automate your pipeline with AI workflows that help your team move faster.</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <a href="#quote" className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20">Request a quote</a>
-              <Link href="/dashboard" className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-950">Open dashboard</Link>
+              <Link href="/admin/login" className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-950">Admin login</Link>
             </div>
             <div className="mt-8 flex items-center gap-6 text-sm text-slate-500 dark:text-slate-400">
               <span>Trusted by 300+ teams</span>

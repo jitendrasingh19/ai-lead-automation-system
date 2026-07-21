@@ -14,14 +14,14 @@ export default function LeadTable({
 }: LeadTableProps) {
   if (!leads.length) {
     return (
-      <div className="mt-10 text-center text-gray-500">
-        No leads found.
+      <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-sm text-slate-500">
+        No leads found for the current filters.
       </div>
     );
   }
 
   return (
-    <div className="grid gap-6 mt-6 sm:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
+    <div className="mt-8 grid gap-6 sm:grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3">
       {leads.map((lead) => (
         <LeadCard
           key={lead.id}

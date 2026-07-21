@@ -11,10 +11,10 @@ export async function POST(request: Request) {
             message: "Login successful",
         });
 
-        response.cookies.set("admin-token", process.env.ADMIN_TOKEN!, {
+        response.cookies.set("admin-token", process.env.ADMIN_TOKEN ?? "demo-admin-token", {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+            sameSite: "lax",
             path: "/",
             maxAge: 60 * 60 * 24, // 1 day
         });

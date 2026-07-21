@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,10 +28,13 @@ export default function LoginPage() {
 
     const data = await response.json();
     console.log(data);
-    
-   if (response.ok) {
-  router.push("/dashboard");
-}
+
+    if (response.ok) {
+      setTimeout(() => {
+        router.push("/dashboard");
+        window.location.assign("/dashboard");
+      }, 150);
+    }
   };
 
   return (

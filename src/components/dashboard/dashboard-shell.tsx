@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   Bell,
@@ -41,15 +43,51 @@ import { AIInsightsPanel } from "@/components/dashboard/ai-insights-panel";
 import { WorkflowTimeline } from "@/components/dashboard/workflow-timeline";
 import { PerformanceSection } from "@/components/dashboard/performance-section";
 
+
+
+
 const navItems = [
-  { icon: LayoutGrid, label: "Dashboard", active: true },
-  { icon: Users, label: "Leads" },
-  { icon: BriefcaseBusiness, label: "Deals" },
-  { icon: Contact, label: "Contacts" },
-  { icon: Bot, label: "AI Insights" },
-  { icon: Workflow, label: "Workflow Logs" },
-  { icon: Orbit, label: "Integrations" },
-  { icon: Settings, label: "Settings" },
+  {
+    icon: LayoutGrid,
+    label: "Dashboard",
+    href: "/dashboard",
+    active: true,
+  },
+  {
+    icon: Users,
+    label: "Leads",
+    href: "/admin/leads",
+  },
+  {
+    icon: BriefcaseBusiness,
+    label: "Deals",
+    href: "/admin/deals",
+  },
+  {
+    icon: Contact,
+    label: "Contacts",
+    href: "/admin/contacts",
+  },
+  {
+    icon: Bot,
+    label: "AI Insights",
+    href: "/admin/ai-insights",
+  },
+  {
+    icon: Workflow,
+    label: "Workflow Logs",
+    href: "/admin/workflow",
+  },
+  {
+    icon: Orbit,
+    label: "Integrations",
+    href: "/admin/integrations",
+  },
+  {
+    icon: Settings,
+    label: "Settings",
+    href: "/admin/settings",
+  },
 ];
 
 export function DashboardShell() {
@@ -132,6 +170,7 @@ export function DashboardShell() {
     }).format(new Date());
   }, []);
 
+const pathname = usePathname();
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.08),_transparent_18%),linear-gradient(to_bottom,#f8fafc_0%,#eef2ff_100%)] dark:bg-[radial-gradient(circle_at_top,_rgba(15,23,42,0.95),_transparent_20%),linear-gradient(to_bottom,#020617_0%,#0f172a_100%)]">
       <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
@@ -215,17 +254,19 @@ export function DashboardShell() {
                   {navItems.map((item) => {
                     const Icon = item.icon;
                     return (
-                      <button
-                        key={item.label}
-                        className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition ${
-                          item.active
-                            ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/20"
-                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
-                        }`}
-                      >
-                        <Icon size={18} />
-                        <span>{item.label}</span>
-                      </button>
+                     <Link
+  key={item.label}
+  href={item.href}
+  onClick={() => setSidebarOpen(false)}
+  className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium transition ${
+    pathname === item.href
+      ? "bg-gradient-to-r from-indigo-600 to-cyan-500 text-white shadow-lg shadow-indigo-500/20"
+      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white"
+  }`}
+>
+  <Icon size={18} />
+  <span>{item.label}</span>
+</Link>
                     );
                   })}
                 </nav>

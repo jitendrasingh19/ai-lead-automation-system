@@ -42,112 +42,72 @@ export default function LeadCard({
   return (
     <div
       onClick={handleOpenDetails}
-      className="group cursor-pointer rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:shadow-xl"
+      className="group cursor-pointer rounded-3xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
     >
-
       <div className="p-6">
-
-        <div className="flex justify-between">
-
+        <div className="flex items-start justify-between gap-3">
           <div className="flex gap-3">
-
-            <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-              <UserCircle2 className="text-indigo-600" size={34}/>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100">
+              <UserCircle2 className="text-indigo-600" size={30} />
             </div>
-
             <div>
-
-              <h2 className="font-bold text-lg">
-                {lead.name}
-              </h2>
-
-              <p className="text-gray-500 text-sm">
-                {lead.company || "No Company"}
-              </p>
-
+              <h2 className="text-lg font-semibold text-slate-900">{lead.name}</h2>
+              <p className="text-sm text-slate-500">{lead.company || "No Company"}</p>
             </div>
-
           </div>
 
-          <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor[lead.status]}`}
-          >
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusColor[lead.status]}`}>
             {lead.status}
           </span>
-
         </div>
 
-        <div className="space-y-3 mt-6">
-
-          <div className="flex gap-3 items-center text-gray-600">
-
-            <Mail size={18}/>
-
-            {lead.email}
-
+        <div className="mt-6 space-y-3">
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <Mail size={18} className="text-indigo-500" />
+            <span>{lead.email}</span>
           </div>
 
-          <div className="flex gap-3 items-center text-gray-600">
-
-            <Phone size={18}/>
-
-            {lead.phone || "Not Available"}
-
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <Phone size={18} className="text-indigo-500" />
+            <span>{lead.phone || "Not Available"}</span>
           </div>
 
-          <div className="flex gap-3 items-center text-gray-600">
-
-            <Building2 size={18}/>
-
-            {lead.jobTitle || "Website Development"}
-
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <Building2 size={18} className="text-indigo-500" />
+            <span>{lead.jobTitle || "Website Development"}</span>
           </div>
 
-          <div className="flex gap-3 items-center text-gray-600">
-
-            <IndianRupee size={18}/>
-
-            {lead.budget || "N/A"}
-
+          <div className="flex items-center gap-3 text-sm text-slate-600">
+            <IndianRupee size={18} className="text-indigo-500" />
+            <span>{lead.budget || "N/A"}</span>
           </div>
 
-          <div className="flex gap-3 items-center text-gray-500 text-sm">
-
-            <Calendar size={16}/>
-
-            {lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "Not Available"}
-
+          <div className="flex items-center gap-3 text-sm text-slate-500">
+            <Calendar size={16} className="text-indigo-500" />
+            <span>{lead.createdAt ? new Date(lead.createdAt).toLocaleDateString() : "Not Available"}</span>
           </div>
-
         </div>
-
       </div>
 
-      <div
-        className="border-t px-6 py-4 flex justify-between"
-        onClick={(e) => e.stopPropagation()}
-      >
-
+      <div className="flex justify-between border-t border-slate-200 px-6 py-4" onClick={(e) => e.stopPropagation()}>
         <button
           type="button"
           onClick={() => onEdit(lead)}
-          className="flex items-center gap-2 text-indigo-600 hover:text-indigo-800 font-medium"
+          className="flex items-center gap-2 font-medium text-indigo-600 transition hover:text-indigo-800"
         >
-          <Pencil size={18}/>
+          <Pencil size={18} />
           Edit
         </button>
 
         <button
           type="button"
           onClick={() => onDelete(lead.id)}
-          className="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium"
+          className="flex items-center gap-2 font-medium text-red-600 transition hover:text-red-800"
         >
-          <Trash2 size={18}/>
+          <Trash2 size={18} />
           Delete
         </button>
-
       </div>
-
     </div>
   );
 }
