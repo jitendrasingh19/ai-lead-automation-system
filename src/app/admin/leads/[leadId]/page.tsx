@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import type { Lead } from "@/types/lead";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Mail, Phone, MessageCircle, MoreHorizontal } from "lucide-react";
@@ -11,11 +12,17 @@ type PageProps = {
 
 async function getLead(leadId: string): Promise<Lead | null> {
   try {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_APP_URL ??
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+    const headerStore = await headers();
+    const forwardedProto = headerStore.get("x-forwarded-proto");
+    const host = headerStore.get("host");
 
-    const res = await fetch(`${baseUrl}/api/leads`, {
+    const baseUrl =
+      forwardedProto && host
+        ? `${forwardedProto}://${host}`
+        : process.env.NEXT_PUBLIC_APP_URL ??
+          (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+
+    const res = await fetch(new URL("/api/leads", baseUrl).toString(), {
       cache: "no-store",
     });
 
