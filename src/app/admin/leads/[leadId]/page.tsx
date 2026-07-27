@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import type { Lead } from "@/types/lead";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ArrowLeft, Mail, Phone, MessageCircle, MoreHorizontal } from "lucide-react";
+import ConvertToDealButton from "@/components/ConvertToDealButton";
 
 type PageProps = {
   params: Promise<{
@@ -36,6 +37,7 @@ async function getLead(leadId: string): Promise<Lead | null> {
     return null;
   }
 }
+
 
 function getInitials(name: string) {
   return name
@@ -117,9 +119,7 @@ export default async function LeadDetailsPage({ params }: PageProps) {
               </button>
             </div>
 
-            <button type="button" className="mt-8 w-full max-w-md rounded-2xl bg-orange-500 px-4 py-3 font-semibold text-white transition hover:bg-orange-600">
-              Convert to Contact
-            </button>
+     <ConvertToDealButton leadId={lead.id} />
 
             <p className="mt-6 text-sm text-slate-500">
               🟢 Last Activity • {lead.createdAt ? new Date(lead.createdAt).toLocaleString() : "Recently"}

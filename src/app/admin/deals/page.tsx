@@ -1,15 +1,19 @@
 'use client';
-
+import PageHeader from '@/app/admin/PageHeader';
 import { useEffect, useState } from 'react';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  useDroppable,
+} from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import type { Deal, DealStage } from '@/types/deal';
-
-const STAGE_COLORS: Record<DealStage, string> = {
-  new: 'bg-blue-100 text-blue-800',
-  contacted: 'bg-yellow-100 text-yellow-800',
-  negotiation: 'bg-purple-100 text-purple-800',
-  won: 'bg-green-100 text-green-800',
-  lost: 'bg-red-100 text-red-800',
-};
 
 type Lead = {
   id: number;
@@ -21,7 +25,8 @@ type Lead = {
   company?: string;
 };
 
-function leadLabel(lead: Lead): string {
+function leadLabel(lead?: Lead): string {
+  if (!lead) return 'Unknown Lead';
   return (
     lead.name ||
     lead.full_name ||
@@ -32,18 +37,26 @@ function leadLabel(lead: Lead): string {
   );
 }
 
-export default function DealsPage() {
+const STAGES: { key: DealStage; label: string; color: string }[] = [
+  { key: 'new', label: 'New', color: 'border-t-blue-500' },
+  { key: 'contacted', label: 'Contacted', color: 'border-t-yellow-500' },
+  { key: 'negotiation', label: 'Negotiation', color: 'border-t-purple-500' },
+  { key: 'won', label: 'Won', color: 'border-t-green-500' },
+  { key: 'lost', label: 'Lost', color: 'border-t-red-500' },
+];
+
+export default function DealsKanbanPage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newDeal, setNewDeal] = useState<{
-    title: string;
-    value: number;
-    stage: DealStage;
-    lead_id: number | '';
-  }>({ title: '', value: 0, stage: 'new', lead_id: '' });
-  const [showForm, setShowForm] = useState(false);
+  const [activeDeal, setActiveDeal] = useState<Deal | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
 
   useEffect(() => {
     loadDeals();
@@ -54,18 +67,13 @@ export default function DealsPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/deals');
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch deals');
-      }
-
+      if (!res.ok) throw new Error('Failed to fetch deals');
       const data = await res.json();
       setDeals(Array.isArray(data) ? data : []);
       setError(null);
     } catch (err) {
-      console.error('Failed to load deals:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load deals');
-      setDeals([]);
+      console.error(err);
+      setError('Failed to load deals');
     } finally {
       setLoading(false);
     }
@@ -82,90 +90,63 @@ export default function DealsPage() {
     }
   };
 
-  const handleAddDeal = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const leadMap = new Map(leads.map((l) => [l.id, l]));
 
-    if (!newDeal.lead_id) {
-      setError('Please select a lead for this deal');
-      return;
-    }
+  function handleDragStart(event: DragStartEvent) {
+    const deal = deals.find((d) => d.id === Number(event.active.id));
+    setActiveDeal(deal ?? null);
+  }
 
-    try {
-      const res = await fetch('/api/deals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newDeal),
-      });
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    setActiveDeal(null);
 
-      if (!res.ok) {
-        throw new Error('Failed to create deal');
-      }
+    if (!over) return;
 
-      const deal = await res.json();
-      setDeals([deal, ...deals]);
-      setNewDeal({ title: '', value: 0, stage: 'new', lead_id: '' });
-      setShowForm(false);
-      setError(null);
-    } catch (err) {
-      console.error('Failed to create deal:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create deal');
-    }
-  };
+    const dealId = Number(active.id);
+    const newStage = over.id as DealStage;
 
-  const handleUpdateStage = async (dealId: string, newStage: DealStage) => {
+    const deal = deals.find((d) => d.id === dealId);
+    if (!deal || deal.stage === newStage) return;
+
+    const prevDeals = deals;
+
+    setDeals((prev) =>
+      prev.map((d) => (d.id === dealId ? { ...d, stage: newStage } : d))
+    );
+
     try {
       const res = await fetch(`/api/deals/${dealId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ stage: newStage }),
       });
-
-      if (!res.ok) {
-        throw new Error('Failed to update deal');
-      }
-
-      const updatedDeal = await res.json();
-      setDeals(deals.map(d => d.id === dealId ? updatedDeal : d));
+      if (!res.ok) throw new Error('Update failed');
     } catch (err) {
-      console.error('Failed to update deal:', err);
-      setError(err instanceof Error ? err.message : 'Failed to update deal');
+      console.error(err);
+      setDeals(prevDeals);
+      setError('Failed to update deal stage');
     }
-  };
+  }
 
-  const handleDeleteDeal = async (dealId: string) => {
-    if (!confirm('Are you sure you want to delete this deal?')) return;
-
-    try {
-      const res = await fetch(`/api/deals/${dealId}`, {
-        method: 'DELETE',
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to delete deal');
-      }
-
-      setDeals(deals.filter(d => d.id !== dealId));
-    } catch (err) {
-      console.error('Failed to delete deal:', err);
-      setError(err instanceof Error ? err.message : 'Failed to delete deal');
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+        <div className="text-gray-500">Loading deals...</div>
+      </div>
+    );
+  }
 
   return (
+    
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900">Deals</h1>
-            <p className="text-gray-600 mt-2">Manage your sales pipeline and deals</p>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition"
-          >
-            {showForm ? 'Cancel' : 'Add Deal'}
-          </button>
-        </div>
+      <div className="max-w-full mx-auto">
+        
+        <PageHeader
+  title="Deals"
+  description="Manage your sales pipeline and deals"
+  badge={`${deals.length} visible deals`}
+/>
 
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
@@ -173,112 +154,114 @@ export default function DealsPage() {
           </div>
         )}
 
-        {showForm && (
-          <form onSubmit={handleAddDeal} className="bg-white rounded-lg shadow-md p-6 mb-8 border border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <select
-                value={newDeal.lead_id}
-                onChange={(e) => setNewDeal({ ...newDeal, lead_id: e.target.value ? Number(e.target.value) : '' })}
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="" disabled>Select Lead</option>
-                {leads.map((lead) => (
-                  <option key={lead.id} value={lead.id}>
-                    {leadLabel(lead)}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                placeholder="Deal Title"
-                value={newDeal.title}
-                onChange={(e) => setNewDeal({ ...newDeal, title: e.target.value })}
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-4 overflow-x-auto pb-4">
+            {STAGES.map((stage) => (
+              <Column
+                key={stage.key}
+                stage={stage}
+                deals={deals.filter((d) => d.stage === stage.key)}
+                leadMap={leadMap}
               />
-              <input
-                type="number"
-                placeholder="Deal Value"
-                value={newDeal.value}
-                onChange={(e) => {
-                  const parsed = parseFloat(e.target.value);
-                  setNewDeal({ ...newDeal, value: isNaN(parsed) ? 0 : parsed });
-                }}
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                value={newDeal.stage}
-                onChange={(e) => setNewDeal({ ...newDeal, stage: e.target.value as DealStage })}
-                className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="new">New</option>
-                <option value="contacted">Contacted</option>
-                <option value="negotiation">Negotiation</option>
-                <option value="won">Won</option>
-                <option value="lost">Lost</option>
-              </select>
-            </div>
-            <button
-              type="submit"
-              className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition w-full"
-            >
-              Create Deal
-            </button>
-          </form>
-        )}
-
-        {loading ? (
-          <div className="text-center py-12">
-            <div className="text-gray-500">Loading deals...</div>
-          </div>
-        ) : deals.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center border border-gray-200">
-            <div className="text-gray-500 mb-4">No deals found</div>
-            <button
-              onClick={() => setShowForm(true)}
-              className="text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Create your first deal
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {deals.map((deal) => (
-              <div key={deal.id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex-1 pr-4">{deal.title}</h3>
-                  <button
-                    onClick={() => handleDeleteDeal(deal.id)}
-                    className="text-red-600 hover:text-red-700 text-sm font-medium"
-                  >
-                    Delete
-                  </button>
-                </div>
-
-                <div className="mb-4">
-                  <div className="text-2xl font-bold text-blue-600">
-                    ${Number(deal.value ?? 0).toLocaleString()}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Stage</label>
-                  <select
-                    value={deal.stage}
-                    onChange={(e) => handleUpdateStage(deal.id, e.target.value as DealStage)}
-                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer font-medium ${STAGE_COLORS[deal.stage as DealStage]}`}
-                  >
-                    <option value="new">New</option>
-                    <option value="contacted">Contacted</option>
-                    <option value="negotiation">Negotiation</option>
-                    <option value="won">Won</option>
-                    <option value="lost">Lost</option>
-                  </select>
-                </div>
-              </div>
             ))}
           </div>
+
+          <DragOverlay>
+            {activeDeal ? (
+              <DealCard deal={activeDeal} lead={leadMap.get(activeDeal.lead_id)} isOverlay />
+            ) : null}
+          </DragOverlay>
+        </DndContext>
+        
+      </div>
+    </div>
+  );
+}
+
+function Column({
+  stage,
+  deals,
+  leadMap,
+}: {
+  stage: { key: DealStage; label: string; color: string };
+  deals: Deal[];
+  leadMap: Map<number, Lead>;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: stage.key });
+
+  const total = deals.reduce((sum, d) => sum + Number(d.value ?? 0), 0);
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`bg-gray-100 rounded-lg p-3 w-72 flex-shrink-0 min-h-[500px] border-t-4 ${stage.color} transition ${
+        isOver ? 'bg-gray-200 ring-2 ring-blue-300' : ''
+      }`}
+    >
+      <div className="flex justify-between items-center mb-1">
+        <h2 className="font-semibold text-sm text-gray-800">{stage.label}</h2>
+        <span className="text-xs bg-white text-gray-600 px-2 py-0.5 rounded-full">
+          {deals.length}
+        </span>
+      </div>
+      <div className="text-xs text-gray-500 mb-3">
+        ${total.toLocaleString()}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        {deals.map((deal) => (
+          <DealCard key={deal.id} deal={deal} lead={leadMap.get(deal.lead_id)} />
+        ))}
+        {deals.length === 0 && (
+          <div className="text-xs text-gray-400 text-center py-6 border-2 border-dashed border-gray-300 rounded-lg">
+            No deals
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function DealCard({
+  deal,
+  lead,
+  isOverlay,
+}: {
+  deal: Deal;
+  lead?: Lead;
+  isOverlay?: boolean;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: deal.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className={`bg-white rounded-md p-3 shadow-sm border border-gray-200 cursor-grab active:cursor-grabbing ${
+        isOverlay ? 'shadow-lg rotate-2' : 'hover:shadow-md'
+      }`}
+    >
+      <p className="text-sm font-medium text-gray-900">{deal.title}</p>
+      <p className="text-xs text-gray-500 mt-1">{leadLabel(lead)}</p>
+      <div className="flex justify-between items-center mt-2">
+        <span className="text-sm font-semibold text-blue-600">
+          ${Number(deal.value ?? 0).toLocaleString()}
+        </span>
+        {deal.probability != null && (
+          <span className="text-xs text-gray-400">{deal.probability}%</span>
         )}
       </div>
     </div>
