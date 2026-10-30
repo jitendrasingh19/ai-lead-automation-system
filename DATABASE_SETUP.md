@@ -4,6 +4,16 @@
 
 The `deals` table has been added to support the sales pipeline feature. You'll need to initialize the database with the provided SQL script.
 
+### Upgrading an existing database
+
+If the `leads` table already exists, running `init-db.sql` does not add newly introduced columns. Apply `migrations/001_add_quote_lead_columns.sql` to the same database used by `DATABASE_URL` before submitting quotes. For example, with `psql`:
+
+```bash
+psql -U postgres -h localhost -d ai_lead_db -f migrations/001_add_quote_lead_columns.sql
+```
+
+For Neon, paste the contents of that migration into the SQL Editor and execute it. The migration is safe to re-run.
+
 ### Option 1: Using psql (PostgreSQL CLI)
 
 If you have PostgreSQL installed locally:
